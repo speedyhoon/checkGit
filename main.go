@@ -19,7 +19,7 @@ var (
 
 func main() {
 	flag.Usage = func() {
-		fmt.Printf("Usage: %s [OPTIONS, ...] [paths, ...]\n", os.Args[0])
+		fmt.Printf("Usage of %s: [flags, ...] [paths, ...]\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 	flag.Parse()
