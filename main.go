@@ -12,8 +12,9 @@ import (
 )
 
 func main() {
-	verbose := flag.Bool("v", false, "verbose")
-	pull := flag.Bool("l", false, "detect out of date repositories that require a pull request")
+	nonGit := flag.Bool("g", false, "Display directories that are not git repositories.")
+	pull := flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
+	verbose := flag.Bool("v", false, "Summarize each git repository status.")
 	flag.Parse()
 
 	directories := flag.Args()
@@ -36,6 +37,9 @@ func main() {
 
 			if gitInfo, err := os.Stat(filepath.Join(path, ".git")); os.IsNotExist(err) || !gitInfo.IsDir() {
 				//Directory is not a git repository
+				if *nonGit {
+					fmt.Println(filepath.Base(path), "Not a git repository")
+				}
 				return nil
 			}
 
