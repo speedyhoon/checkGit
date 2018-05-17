@@ -13,6 +13,7 @@ import (
 
 func main() {
 	verbose := flag.Bool("v", false, "verbose")
+	pull := flag.Bool("l", false, "detect out of date repositories that require a pull request")
 	flag.Parse()
 
 	directories := flag.Args()
@@ -64,10 +65,12 @@ func main() {
 				changes = true
 			}
 
-			out, err = run(path, "git", "remote", "show", "origin")
-			if bytes.Contains(out, []byte(" (local out of date)")) {
-				checks = append(checks, "pull")
-				changes = true
+			if *pull {
+				out, err = run(path, "git", "remote", "show", "origin")
+				if bytes.Contains(out, []byte(" (local out of date)")) {
+					checks = append(checks, "pull")
+					changes = true
+				}
 			}
 
 			if changes {
