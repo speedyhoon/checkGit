@@ -40,7 +40,7 @@ func main() {
 			}
 
 			out, err := run(path, "git", "status")
-			if err != nil{
+			if err != nil {
 				return err
 			}
 
@@ -76,7 +76,7 @@ func main() {
 			if changes {
 				if !*verbose {
 					fmt.Println(filepath.Base(path))
-				}else {
+				} else {
 					fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, ", "))
 				}
 			}
