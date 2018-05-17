@@ -3,6 +3,13 @@ Check all Git subdirectories to see if any have unstaged or uncommitted changes 
 
 [![go report card](https://goreportcard.com/badge/github.com/speedyhoon/checkGit)](https://goreportcard.com/report/github.com/speedyhoon/checkGit)
 
+**Help**
+```
+Usage of checkGit.exe:
+  -g    Display directories that are not git repositories.
+  -l    Detect out of date repositories that require a pull request.
+  -v    Summarize each git repository status.
+```
 
 ```cmd
 checkGit.exe path_to_projects
