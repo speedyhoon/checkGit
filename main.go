@@ -13,8 +13,8 @@ import (
 
 var (
 	nonGit = flag.Bool("g", false, "Display subdirectories that aren't Git repositories.")
-	pull = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
-	quiet = flag.Bool("q", false, "Only display repository names & hide summary.")
+	pull   = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
+	quiet  = flag.Bool("q", false, "Only display repository names & hide summary.")
 )
 
 func main() {
