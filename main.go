@@ -12,13 +12,6 @@ import (
 )
 
 func main() {
-	const (
-		clean        = "\nnothing to commit, working tree clean"
-		uncommitted  = "\nChanges to be committed:"
-		localChanges = "\nChanges not staged for commit:"
-		untracked    = "\nUntracked files:"
-	)
-
 	verbose := flag.Bool("v", false, "verbose")
 	flag.Parse()
 
@@ -46,28 +39,45 @@ func main() {
 			}
 
 			out, err := run(path, "git", "status")
+			if err != nil{
+				return err
+			}
+
 			out = bytes.TrimSpace(out)
 
-			if len(out) < 1 || bytes.HasSuffix(out, []byte(clean)) {
-				return nil
+			var checks []string
+			var changes bool
+			if bytes.Contains(out, []byte("\nChanges to be committed:")) {
+				checks = append(checks, "uncommitted")
+				changes = true
 			}
-			if !*verbose {
-				fmt.Println(filepath.Base(path))
-				return nil
+			if bytes.Contains(out, []byte("\nChanges not staged for commit:")) {
+				checks = append(checks, "local changes")
+				changes = true
+			}
+			if bytes.Contains(out, []byte("\nUntracked files:")) {
+				checks = append(checks, "untracked files")
+				changes = true
+			}
+			if bytes.Contains(out, []byte("\nYour branch is ahead of ")) {
+				checks = append(checks, "push")
+				changes = true
 			}
 
-			var checks []string
-			if bytes.Contains(out, []byte(uncommitted)) {
-				checks = append(checks, "uncommitted")
+			out, err = run(path, "git", "remote", "show", "origin")
+			if bytes.Contains(out, []byte(" (local out of date)")) {
+				checks = append(checks, "pull")
+				changes = true
 			}
-			if bytes.Contains(out, []byte(localChanges)) {
-				checks = append(checks, "local changes")
+
+			if changes {
+				if !*verbose {
+					fmt.Println(filepath.Base(path))
+				}else {
+					fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, ", "))
+				}
 			}
-			if bytes.Contains(out, []byte(untracked)) {
-				checks = append(checks, "untracked files")
-			}
-			fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, ", "))
-			return nil
+			return err
 		})
 		if err != nil {
 			fmt.Println(err)
