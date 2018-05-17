@@ -1,5 +1,5 @@
 # checkGit
-Check all Git subdirectories to see if any have unstaged or uncommitted changes or need to be pushed or pulled.
+Flag which Git repositories need to be pulled or have unpushed, unstaged or uncommitted changes.
 
 [![go report card](https://goreportcard.com/badge/github.com/speedyhoon/checkGit)](https://goreportcard.com/report/github.com/speedyhoon/checkGit)
 
@@ -8,31 +8,28 @@ Check all Git subdirectories to see if any have unstaged or uncommitted changes 
 Usage of checkGit.exe:
   -g    Display directories that are not git repositories.
   -l    Detect out of date repositories that require a pull request.
-  -v    Summarize each git repository status.
+  -q    Only display repository names and hide summary.
 ```
 
-```cmd
-checkGit.exe path_to_projects
+**Usage:** ```checkGit -g -l path_to_dir_containing_git_repos```
+
+Outputs:
+```
+BuildIt.ninja: push, uncommitted, local changes, untracked files
+EventBucket: pull, local changes
+foobar: Not a git repository
+mindjholts: uncommitted, local changes
+replace: untracked files
+session: push, local changes
 ```
 
+**Quiet mode:** ```checkGit -q path_to_dir_containing_git_repos```
+
+Outputs:
 ```
 BuildIt.ninja
 EventBucket
 mindjholts
 replace
 session
-```
-
-
-**Verbose mode**
-```cmd
-checkGit.exe -v path_to_projects
-```
-
-```
-BuildIt.ninja: uncommitted, local changes, untracked files
-EventBucket: local changes
-mindjholts: uncommitted, local changes
-replace: untracked files
-session: local changes
 ```

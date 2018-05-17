@@ -14,7 +14,7 @@ import (
 func main() {
 	nonGit := flag.Bool("g", false, "Display directories that are not git repositories.")
 	pull := flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
-	verbose := flag.Bool("v", false, "Summarize each git repository status.")
+	quiet := flag.Bool("q", false, "Only display repository names and hide summary.")
 	flag.Parse()
 
 	directories := flag.Args()
@@ -77,7 +77,7 @@ func main() {
 			}
 
 			if changes {
-				if !*verbose {
+				if *quiet {
 					fmt.Println(filepath.Base(path))
 				} else {
 					fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, ", "))
