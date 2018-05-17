@@ -43,15 +43,26 @@ func main() {
 				return nil
 			}
 
-			out, err := run(path, "git", "status")
-			if err != nil {
-				return err
-			}
-
-			out = bytes.TrimSpace(out)
-
 			var checks []string
 			var changes bool
+			if *pull {
+				out, err := run(path, "git", "remote", "show", "origin")
+				if err != nil {
+					return err
+				}
+				if bytes.Contains(out, []byte(" (local out of date)")) {
+					checks = append(checks, "pull")
+					changes = true
+				}
+			}
+
+			out, err := run(path, "git", "status")
+			out = bytes.TrimSpace(out)
+
+			if bytes.Contains(out, []byte("\nYour branch is ahead of ")) {
+				checks = append(checks, "push")
+				changes = true
+			}
 			if bytes.Contains(out, []byte("\nChanges to be committed:")) {
 				checks = append(checks, "uncommitted")
 				changes = true
@@ -63,18 +74,6 @@ func main() {
 			if bytes.Contains(out, []byte("\nUntracked files:")) {
 				checks = append(checks, "untracked files")
 				changes = true
-			}
-			if bytes.Contains(out, []byte("\nYour branch is ahead of ")) {
-				checks = append(checks, "push")
-				changes = true
-			}
-
-			if *pull {
-				out, err = run(path, "git", "remote", "show", "origin")
-				if bytes.Contains(out, []byte(" (local out of date)")) {
-					checks = append(checks, "pull")
-					changes = true
-				}
 			}
 
 			if changes {
