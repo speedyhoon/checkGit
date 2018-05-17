@@ -11,10 +11,17 @@ import (
 	"strings"
 )
 
+var (
+	nonGit = flag.Bool("g", false, "Display subdirectories that aren't Git repositories.")
+	pull = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
+	quiet = flag.Bool("q", false, "Only display repository names & hide summary.")
+)
+
 func main() {
-	nonGit := flag.Bool("g", false, "Display directories that are not git repositories.")
-	pull := flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
-	quiet := flag.Bool("q", false, "Only display repository names and hide summary.")
+	flag.Usage = func() {
+		fmt.Printf("Usage: %s [OPTIONS, ...] [paths, ...]\n", os.Args[0])
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 
 	directories := flag.Args()
@@ -30,65 +37,69 @@ func main() {
 	}
 
 	for _, dir := range directories {
-		err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-			if filepath.Dir(path) != dir || info == nil || !info.IsDir() {
-				return nil
-			}
-
-			if gitInfo, err := os.Stat(filepath.Join(path, ".git")); os.IsNotExist(err) || !gitInfo.IsDir() {
-				//Directory is not a git repository
-				if *nonGit {
-					fmt.Println(filepath.Base(path), "Not a git repository")
-				}
-				return nil
-			}
-
-			var checks []string
-			var changes bool
-			if *pull {
-				out, err := run(path, "git", "remote", "show", "origin")
-				if err != nil {
-					return err
-				}
-				if bytes.Contains(out, []byte(" (local out of date)")) {
-					checks = append(checks, "pull")
-					changes = true
-				}
-			}
-
-			out, err := run(path, "git", "status")
-			out = bytes.TrimSpace(out)
-
-			if bytes.Contains(out, []byte("\nYour branch is ahead of ")) {
-				checks = append(checks, "push")
-				changes = true
-			}
-			if bytes.Contains(out, []byte("\nChanges to be committed:")) {
-				checks = append(checks, "uncommitted")
-				changes = true
-			}
-			if bytes.Contains(out, []byte("\nChanges not staged for commit:")) {
-				checks = append(checks, "local changes")
-				changes = true
-			}
-			if bytes.Contains(out, []byte("\nUntracked files:")) {
-				checks = append(checks, "untracked files")
-				changes = true
-			}
-
-			if changes {
-				if *quiet {
-					fmt.Println(filepath.Base(path))
-				} else {
-					fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, ", "))
-				}
-			}
-			return err
-		})
+		err := walkRepos(dir)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
+}
+
+func walkRepos(dir string) error {
+	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if filepath.Dir(path) != dir || info == nil || !info.IsDir() {
+			return nil
+		}
+
+		if gitInfo, err := os.Stat(filepath.Join(path, ".git")); os.IsNotExist(err) || !gitInfo.IsDir() {
+			//Directory is not a git repository
+			if *nonGit {
+				fmt.Println(filepath.Base(path), "Not a git repository")
+			}
+			return nil
+		}
+
+		var checks []string
+		var flagged bool
+		if *pull {
+			out, err := run(path, "git", "remote", "show", "origin")
+			if err != nil {
+				return err
+			}
+			if bytes.Contains(out, []byte(" (local out of date)")) {
+				checks = append(checks, "pull")
+				flagged = true
+			}
+		}
+
+		out, err := run(path, "git", "status")
+		out = bytes.TrimSpace(out)
+
+		if bytes.Contains(out, []byte("\nYour branch is ahead of ")) {
+			checks = append(checks, "push")
+			flagged = true
+		}
+		if bytes.Contains(out, []byte("\nChanges to be committed:")) {
+			checks = append(checks, "uncommitted")
+			flagged = true
+		}
+		if bytes.Contains(out, []byte("\nChanges not staged for commit:")) {
+			checks = append(checks, "local changes")
+			flagged = true
+		}
+		if bytes.Contains(out, []byte("\nUntracked files:")) {
+			checks = append(checks, "untracked files")
+			flagged = true
+		}
+
+		if flagged {
+			if *quiet {
+				fmt.Println(filepath.Base(path))
+			} else {
+				fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, ", "))
+			}
+		}
+		return err
+	})
 }
 
 func run(dir, command string, args ...string) ([]byte, error) {
