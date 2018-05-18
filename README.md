@@ -1,7 +1,8 @@
 # checkGit
 Flag which Git repositories need to be pulled or have unpushed, unstaged or uncommitted changes.
 
-[![go report card](https://goreportcard.com/badge/github.com/speedyhoon/checkGit)](https://goreportcard.com/report/github.com/speedyhoon/checkGit)
+[![Build Status](https://travis-ci.org/speedyhoon/checkGit.svg?branch=master)](https://travis-ci.org/speedyhoon/checkGit)
+[![Go Report Card](https://goreportcard.com/badge/github.com/speedyhoon/checkGit)](https://goreportcard.com/report/github.com/speedyhoon/checkGit)
 
 **Help**
 ```
