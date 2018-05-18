@@ -5,7 +5,7 @@ Flag which Git repositories need to be pulled or have unpushed, unstaged or unco
 
 **Help**
 ```
-Usage of checkGit.exe:
+Usage of checkGit.exe: [flags, ...] [paths, ...]
   -g    Display directories that are not git repositories.
   -l    Detect out of date repositories that require a pull request.
   -q    Only display repository names and hide summary.
