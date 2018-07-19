@@ -27,17 +27,19 @@ func main() {
 	directories := flag.Args()
 
 	if len(directories) == 0 {
-		dirRun, err := os.Executable()
-		if err != nil {
-			directories = []string{"."}
-		} else {
-			//Strip the application name from path
-			directories = []string{filepath.Dir(dirRun)}
-		}
+		directories = []string{"."}
 	}
 
+	var err error
 	for _, dir := range directories {
-		err := walkRepos(dir)
+		//If dir is a relative path then join it onto the current working directory
+		dir, err = filepath.Abs(dir)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		err = walkRepos(dir)
 		if err != nil {
 			fmt.Println(err)
 		}
