@@ -4,6 +4,11 @@ Flag which Git repositories need to be pulled or have unpushed, unstaged or unco
 [![Build Status](https://travis-ci.org/speedyhoon/checkGit.svg?branch=master)](https://travis-ci.org/speedyhoon/checkGit)
 [![Go Report Card](https://goreportcard.com/badge/github.com/speedyhoon/checkGit)](https://goreportcard.com/report/github.com/speedyhoon/checkGit)
 
+**Install**
+```
+go get github.com/speedyhoon/checkGit
+```
+
 **Help**
 ```
 Usage of checkGit.exe: [flags, ...] [paths, ...]
