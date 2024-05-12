@@ -6,7 +6,7 @@ Flag which Git repositories need to be pulled or have unpushed, unstaged or unco
 
 **Install**
 ```
-go get github.com/speedyhoon/checkGit
+go install github.com/speedyhoon/checkGit@latest
 ```
 
 **Help**
