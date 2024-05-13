@@ -14,6 +14,7 @@ go install github.com/speedyhoon/checkGit@latest
 Usage of checkGit.exe: [flags, ...] [paths, ...]
   -g    Display directories that are not git repositories.
   -l    Detect out of date repositories that require a pull request.
+  -p    Only display repositories ahead that can be pushed.
   -q    Only display repository names and hide summary.
 ```
 

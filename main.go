@@ -14,6 +14,7 @@ import (
 var (
 	nonGit = flag.Bool("g", false, "Display subdirectories that aren't Git repositories.")
 	pull   = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
+	push   = flag.Bool("p", false, "Only display repositories ahead that can be pushed.")
 	quiet  = flag.Bool("q", false, "Only display repository names & hide summary.")
 )
 
@@ -61,7 +62,7 @@ func walkRepos(dir string) error {
 		}
 
 		var checks []string
-		var flagged bool
+		var flagged, canPush bool
 		if *pull {
 			out, err := run(path, "git", "remote", "show", "origin")
 			if err != nil {
@@ -79,6 +80,7 @@ func walkRepos(dir string) error {
 		if bytes.Contains(out, []byte("\nYour branch is ahead of ")) {
 			checks = append(checks, "push")
 			flagged = true
+			canPush = true
 		}
 		if bytes.Contains(out, []byte("\nChanges to be committed:")) {
 			checks = append(checks, "uncommitted")
@@ -93,7 +95,7 @@ func walkRepos(dir string) error {
 			flagged = true
 		}
 
-		if flagged {
+		if flagged && !*push || *push && canPush {
 			if *quiet {
 				fmt.Println(filepath.Base(path))
 			} else {
