@@ -122,6 +122,10 @@ func run(dir, command string, args ...string) ([]byte, error) {
 		return nil, err
 	}
 
+	if err = cmd.Start(); err != nil {
+		return nil, err
+	}
+
 	var errs []string
 	var output []byte
 	scanOut := bufio.NewScanner(stdout)
@@ -129,10 +133,11 @@ func run(dir, command string, args ...string) ([]byte, error) {
 		//Gather output from external command
 		for scanOut.Scan() {
 			output = append(output, []byte(fmt.Sprintf("%v\n", scanOut.Text()))...)
-		}
-		//Collect stdout scanner error
-		if err = scanOut.Err(); err != nil {
-			errs = append(errs, "stdout scan err: "+err.Error())
+
+			//Collect stdout scanner error
+			if err = scanOut.Err(); err != nil {
+				errs = append(errs, "stdout scan err: "+err.Error())
+			}
 		}
 	}()
 
@@ -141,22 +146,19 @@ func run(dir, command string, args ...string) ([]byte, error) {
 		//Collect all errors returned from stderr and scanner errors
 		for scanErr.Scan() {
 			errs = append(errs, scanErr.Text())
-		}
-		if err = scanErr.Err(); err != nil {
-			errs = append(errs, "stderr scan err: "+err.Error())
+
+			if err = scanErr.Err(); err != nil {
+				errs = append(errs, "stderr scan err: "+err.Error())
+			}
 		}
 	}()
-
-	if err = cmd.Start(); err != nil {
-		errs = append(errs, err.Error())
-	}
 
 	if err = cmd.Wait(); err != nil {
 		errs = append(errs, err.Error())
 	}
 
 	//Return all the errors from stdout, stderr, start & wait
-	if len(errs) > 0 {
+	if len(errs) >= 1 {
 		return output, fmt.Errorf(strings.Join(errs, "\n"))
 	}
 	return output, nil
