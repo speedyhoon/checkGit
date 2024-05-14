@@ -56,41 +56,46 @@ func walkRepos(dir string) error {
 		if gitInfo, err := os.Stat(filepath.Join(path, ".git")); os.IsNotExist(err) || !gitInfo.IsDir() {
 			//Directory is not a git repository
 			if *nonGit {
-				fmt.Println(filepath.Base(path), "Not a git repository")
+				fmt.Println(filepath.Base(path), "not a git repository")
 			}
 			return nil
 		}
 
 		var checks []string
+		var src []byte
 		var flagged, canPush bool
 		if *pull {
-			out, err := run(path, "git", "remote", "show", "origin")
+			src, err = run(path, "git", "remote", "show", "origin")
 			if err != nil {
 				return err
 			}
-			if bytes.Contains(out, []byte(" (local out of date)")) {
+
+			if bytes.Contains(src, []byte(" (local out of date)")) {
 				checks = append(checks, "pull")
 				flagged = true
 			}
 		}
 
-		out, err := run(path, "git", "status")
-		out = bytes.TrimSpace(out)
+		src, err = run(path, "git", "status")
+		if err != nil {
+			return err
+		}
 
-		if bytes.Contains(out, []byte("\nYour branch is ahead of ")) {
+		src = bytes.TrimSpace(src)
+		if bytes.Contains(src, []byte("\nYour branch is ahead of ")) {
 			checks = append(checks, "push")
 			flagged = true
 			canPush = true
 		}
-		if bytes.Contains(out, []byte("\nChanges to be committed:")) {
+		if bytes.Contains(src, []byte("\nChanges to be committed:")) {
 			checks = append(checks, "uncommitted")
 			flagged = true
 		}
-		if bytes.Contains(out, []byte("\nChanges not staged for commit:")) {
+		if bytes.Contains(src, []byte("\nChanges not staged for commit:")) {
 			checks = append(checks, "local changes")
 			flagged = true
 		}
-		if bytes.Contains(out, []byte("\nUntracked files:")) {
+		if bytes.Contains(src, []byte("\nUntracked files:")) {
 			checks = append(checks, "untracked files")
 			flagged = true
 		}
