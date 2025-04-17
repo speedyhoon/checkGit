@@ -15,7 +15,7 @@ var (
 	nonGit = flag.Bool("g", false, "Display subdirectories that aren't Git repositories.")
 	pull   = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
 	push   = flag.Bool("p", false, "Only display repositories ahead that can be pushed.")
-	quiet  = flag.Bool("q", false, "Only display repository names & hide summary.")
+	quiet  = flag.Bool("q", false, "Only display repository names and hide summary.")
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 
 	var err error
 	for _, dir := range directories {
-		//If dir is a relative path then join it onto the current working directory
+		// If dir is a relative path, then join it onto the current working directory.
 		dir, err = filepath.Abs(dir)
 		if err != nil {
 			fmt.Println(err)
@@ -54,7 +54,7 @@ func walkRepos(dir string) error {
 		}
 
 		if gitInfo, err := os.Stat(filepath.Join(path, ".git")); os.IsNotExist(err) || !gitInfo.IsDir() {
-			//Directory is not a git repository
+			// Directory is not a git repository.
 			if *nonGit {
 				fmt.Println(filepath.Base(path), "not a git repository")
 			}
@@ -135,11 +135,11 @@ func run(dir, command string, args ...string) ([]byte, error) {
 	var output []byte
 	scanOut := bufio.NewScanner(stdout)
 	go func() {
-		//Gather output from external command
+		// Gather output from external command.
 		for scanOut.Scan() {
 			output = append(output, []byte(fmt.Sprintf("%v\n", scanOut.Text()))...)
 
-			//Collect stdout scanner error
+			// Collect stdout scanner error.
 			if err = scanOut.Err(); err != nil {
 				errs = append(errs, "stdout scan err: "+err.Error())
 			}
@@ -148,7 +148,7 @@ func run(dir, command string, args ...string) ([]byte, error) {
 
 	scanErr := bufio.NewScanner(stderr)
 	go func() {
-		//Collect all errors returned from stderr and scanner errors
+		// Collect all errors returned from stderr and scanner errors.
 		for scanErr.Scan() {
 			errs = append(errs, scanErr.Text())
 
@@ -162,7 +162,7 @@ func run(dir, command string, args ...string) ([]byte, error) {
 		errs = append(errs, err.Error())
 	}
 
-	//Return all the errors from stdout, stderr, start & wait
+	// Return all the errors from stdout, stderr, start and wait.
 	if len(errs) >= 1 {
 		return output, fmt.Errorf(strings.Join(errs, "\n"))
 	}
