@@ -1,7 +1,6 @@
 # checkGit
 Flag which Git repositories need to be pulled or have unpushed, unstaged or uncommitted changes.
 
-[![Build Status](https://travis-ci.org/speedyhoon/checkGit.svg?branch=master)](https://travis-ci.org/speedyhoon/checkGit)
 [![Go Report Card](https://goreportcard.com/badge/github.com/speedyhoon/checkGit)](https://goreportcard.com/report/github.com/speedyhoon/checkGit)
 
 **Install**
@@ -11,7 +10,7 @@ go install github.com/speedyhoon/checkGit@latest
 
 **Help**
 ```
-Usage of checkGit.exe: [flags, ...] [paths, ...]
+Usage of checkGit: [flags, ...] [paths, ...]
   -g    Display directories that are not git repositories.
   -l    Detect out of date repositories that require a pull request.
   -p    Only display repositories ahead that can be pushed.
