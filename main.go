@@ -71,6 +71,10 @@ func walkRepos(dir string) error {
 			return err
 		}
 
+		if *nonGit && *quiet {
+			return nil
+		}
+
 		var checks []string
 		var flagged, canPush bool
 		if *pull {
@@ -138,6 +142,10 @@ func remoteFetchName(src []byte) string {
 
 func printNotARepo(path string) {
 	if *nonGit {
+		if *quiet {
+			fmt.Println(filepath.Base(path))
+			return
+		}
 		fmt.Println(filepath.Base(path), notARepo)
 	}
 }
