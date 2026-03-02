@@ -12,15 +12,25 @@ import (
 )
 
 var (
+	brief  = flag.Bool("b", false, fmt.Sprintf("Brief summary. Legned:\n%s", summary))
 	nonGit = flag.Bool("g", false, "Display subdirectories that aren't Git repositories.")
 	pull   = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
 	push   = flag.Bool("p", false, "Only display repositories ahead that can be pushed.")
 	quiet  = flag.Bool("q", false, "Only display repository names and hide summary.")
+
+	summary = summaryOptions{
+		Pull:         summaryOption{"pull", "L"},
+		Push:         summaryOption{"push", "P"},
+		Uncommitted:  summaryOption{"uncommitted", "U"},
+		LocalChanges: summaryOption{"local changes", "C"},
+		Untracked:    summaryOption{"untracked files", "F"},
+		NotGit:       summaryOption{notARepo, "G"},
+	}
 )
 
 func main() {
 	flag.Usage = func() {
-		fmt.Printf("Usage of %s: [flags, ...] [paths, ...]\n", os.Args[0])
+		fmt.Println("Usage of checkGit: [flags, ...] [paths, ...]")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -95,27 +105,27 @@ func walkRepos(dir string) error {
 			}
 
 			if bytes.Contains(src, []byte(" (local out of date)")) {
-				checks = append(checks, "pull")
+				checks = append(checks, summary.Pull.String())
 				flagged = true
 			}
 		}
 
 		src = bytes.TrimSpace(src)
 		if bytes.Contains(src, []byte("\nYour branch is ahead of ")) {
-			checks = append(checks, "push")
+			checks = append(checks, summary.Push.String())
 			flagged = true
 			canPush = true
 		}
 		if bytes.Contains(src, []byte("\nChanges to be committed:")) {
-			checks = append(checks, "uncommitted")
+			checks = append(checks, summary.Uncommitted.String())
 			flagged = true
 		}
 		if bytes.Contains(src, []byte("\nChanges not staged for commit:")) {
-			checks = append(checks, "local changes")
+			checks = append(checks, summary.LocalChanges.String())
 			flagged = true
 		}
 		if bytes.Contains(src, []byte("\nUntracked files:")) {
-			checks = append(checks, "untracked files")
+			checks = append(checks, summary.Untracked.String())
 			flagged = true
 		}
 
@@ -123,11 +133,37 @@ func walkRepos(dir string) error {
 			if *quiet {
 				fmt.Println(filepath.Base(path))
 			} else {
-				fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, ", "))
+				separator := ", "
+				if *brief {
+					separator = "  "
+				}
+				fmt.Printf("%v: %v\n", filepath.Base(path), strings.Join(checks, separator))
 			}
 		}
 		return err
 	})
+}
+
+type summaryOptions struct {
+	Pull, Push, Uncommitted, LocalChanges, Untracked, NotGit summaryOption
+}
+
+func (s summaryOptions) String() string {
+	var list []string
+	for _, option := range []summaryOption{s.Pull, s.Push, s.Uncommitted, s.LocalChanges, s.Untracked, s.NotGit} {
+		list = append(list, fmt.Sprintf("\t%s: %s", option[0], option[1]))
+	}
+	return strings.Join(list, "\n")
+}
+
+type summaryOption [2]string
+
+func (s summaryOption) String() string {
+	const long, short = 0, 1
+	if *brief {
+		return s[short]
+	}
+	return s[long]
 }
 
 func remoteFetchName(src []byte) string {
@@ -146,7 +182,7 @@ func printNotARepo(path string) {
 			fmt.Println(filepath.Base(path))
 			return
 		}
-		fmt.Println(filepath.Base(path), notARepo)
+		fmt.Println(filepath.Base(path), summary.NotGit.String())
 	}
 }
 
