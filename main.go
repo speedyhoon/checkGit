@@ -47,6 +47,8 @@ func main() {
 	}
 }
 
+const notARepo = "not a git repository"
+
 func walkRepos(dir string) error {
 	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if filepath.Dir(path) != dir || info == nil || !info.IsDir() {
@@ -55,9 +57,7 @@ func walkRepos(dir string) error {
 
 		if gitInfo, err := os.Stat(filepath.Join(path, ".git")); os.IsNotExist(err) || !gitInfo.IsDir() {
 			// Directory is not a git repository.
-			if *nonGit {
-				fmt.Println(filepath.Base(path), "not a git repository")
-			}
+			printNotARepo(path)
 			return nil
 		}
 
@@ -78,6 +78,10 @@ func walkRepos(dir string) error {
 
 		src, err = run(path, "git", "status")
 		if err != nil {
+			if strings.Contains(strings.ToLower(err.Error()), notARepo) {
+				printNotARepo(path)
+				return nil
+			}
 			return err
 		}
 
@@ -109,6 +113,12 @@ func walkRepos(dir string) error {
 		}
 		return err
 	})
+}
+
+func printNotARepo(path string) {
+	if *nonGit {
+		fmt.Println(filepath.Base(path), notARepo)
+	}
 }
 
 func run(dir, command string, args ...string) ([]byte, error) {
