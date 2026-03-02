@@ -74,7 +74,18 @@ func walkRepos(dir string) error {
 		var checks []string
 		var flagged, canPush bool
 		if *pull {
-			src, err = run(path, "git", "remote", "show", "origin")
+			src, err = run(path, "git", "remote", "-v")
+			if err != nil {
+				return err
+			}
+
+			remote := remoteFetchName(src)
+			if remote == "" {
+				// Doesn't have any remote repositories listed.
+				return nil
+			}
+
+			src, err = run(path, "git", "remote", "show", remote)
 			if err != nil {
 				return err
 			}
@@ -113,6 +124,16 @@ func walkRepos(dir string) error {
 		}
 		return err
 	})
+}
+
+func remoteFetchName(src []byte) string {
+	const fetch, newLine, tab = " (fetch)", "\n", "\t"
+	for _, line := range bytes.Split(src, []byte(newLine)) {
+		if bytes.HasSuffix(line, []byte(fetch)) {
+			return string(bytes.Split(line, []byte(tab))[0])
+		}
+	}
+	return ""
 }
 
 func printNotARepo(path string) {
