@@ -61,8 +61,17 @@ func walkRepos(dir string) error {
 			return nil
 		}
 
-		var checks []string
 		var src []byte
+		src, err = run(path, "git", "status")
+		if err != nil {
+			if strings.Contains(strings.ToLower(err.Error()), notARepo) {
+				printNotARepo(path)
+				return nil
+			}
+			return err
+		}
+
+		var checks []string
 		var flagged, canPush bool
 		if *pull {
 			src, err = run(path, "git", "remote", "show", "origin")
@@ -74,15 +83,6 @@ func walkRepos(dir string) error {
 				checks = append(checks, "pull")
 				flagged = true
 			}
-		}
-
-		src, err = run(path, "git", "status")
-		if err != nil {
-			if strings.Contains(strings.ToLower(err.Error()), notARepo) {
-				printNotARepo(path)
-				return nil
-			}
-			return err
 		}
 
 		src = bytes.TrimSpace(src)
