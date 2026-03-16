@@ -26,6 +26,9 @@ var (
 		Untracked:    summaryOption{"untracked files", "F"},
 		NotGit:       summaryOption{notARepo, "G"},
 	}
+
+	// GitPath is the location of the git executable.
+	GitPath = "git"
 )
 
 func main() {
@@ -33,6 +36,7 @@ func main() {
 		fmt.Println("Usage of checkGit: [flags, ...] [paths, ...]")
 		flag.PrintDefaults()
 	}
+	flag.StringVar(&GitPath, "git", GitPath, usageFlagGit)
 	flag.Parse()
 
 	directories := flag.Args()
