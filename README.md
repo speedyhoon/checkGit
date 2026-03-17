@@ -12,7 +12,7 @@ Flag which Git repositories need to be pulled or have unpushed, unstaged or unco
 
 ```
 Usage of checkGit: [flags, ...] [paths, ...]
-  -b    Brief summary. Legned:
+  -b    Brief summary. Legend:
                 pull: L
                 push: P
                 uncommitted: U

@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	brief  = flag.Bool("b", false, fmt.Sprintf("Brief summary. Legned:\n%s", summary))
+	brief  = flag.Bool("b", false, fmt.Sprintf("Brief summary. Legend:\n%s", summary))
 	nonGit = flag.Bool("g", false, "Display subdirectories that aren't Git repositories.")
 	pull   = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
 	push   = flag.Bool("p", false, "Only display repositories ahead that can be pushed.")
