@@ -12,13 +12,13 @@ import (
 )
 
 var (
-	brief  = flag.Bool("b", false, fmt.Sprintf("Brief summary. Legend:\n%s", summary))
+	brief  = flag.Bool("b", false, fmt.Sprintf("Brief summary. Legend:\n%s", Summary))
 	nonGit = flag.Bool("g", false, "Display subdirectories that aren't Git repositories.")
 	pull   = flag.Bool("l", false, "Detect out of date repositories that require a pull request.")
 	push   = flag.Bool("p", false, "Only display repositories ahead that can be pushed.")
 	quiet  = flag.Bool("q", false, "Only display repository names and hide summary.")
 
-	summary = summaryOptions{
+	Summary = summaryOptions{
 		Pull:         summaryOption{"pull", "L"},
 		Push:         summaryOption{"push", "P"},
 		Uncommitted:  summaryOption{"uncommitted", "U"},
@@ -109,27 +109,27 @@ func walkRepos(dir string) error {
 			}
 
 			if bytes.Contains(src, []byte(" (local out of date)")) {
-				checks = append(checks, summary.Pull.String())
+				checks = append(checks, Summary.Pull.String())
 				flagged = true
 			}
 		}
 
 		src = bytes.TrimSpace(src)
 		if bytes.Contains(src, []byte("\nYour branch is ahead of ")) {
-			checks = append(checks, summary.Push.String())
+			checks = append(checks, Summary.Push.String())
 			flagged = true
 			canPush = true
 		}
 		if bytes.Contains(src, []byte("\nChanges to be committed:")) {
-			checks = append(checks, summary.Uncommitted.String())
+			checks = append(checks, Summary.Uncommitted.String())
 			flagged = true
 		}
 		if bytes.Contains(src, []byte("\nChanges not staged for commit:")) {
-			checks = append(checks, summary.LocalChanges.String())
+			checks = append(checks, Summary.LocalChanges.String())
 			flagged = true
 		}
 		if bytes.Contains(src, []byte("\nUntracked files:")) {
-			checks = append(checks, summary.Untracked.String())
+			checks = append(checks, Summary.Untracked.String())
 			flagged = true
 		}
 
@@ -186,7 +186,7 @@ func printNotARepo(path string) {
 			fmt.Println(filepath.Base(path))
 			return
 		}
-		fmt.Println(filepath.Base(path), summary.NotGit.String())
+		fmt.Println(filepath.Base(path), Summary.NotGit.String())
 	}
 }
 
